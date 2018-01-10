@@ -1,4 +1,4 @@
-Red Wind Quality by Justin Brown
+Red Wine Quality by Justin Brown
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -258,21 +258,36 @@ significant correlations in the lower to middle part of each scale.  Let's
 take another look at these charts without the outliers.  Using box plots, let's
 determine where we should set the limits for deterimining the outliers.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, box_plots}
-p1 <- ggplot(aes(x = quality, y = volatile.acidity, group = quality),
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.height=10, fig.width=10, box_plots}
+p1 <- ggplot(aes(x = factor(quality), y = volatile.acidity),
         data = rw) +
-  geom_boxplot()+
-  scale_x_continuous(breaks = seq(3,8,1))
+  geom_jitter(alpha = .3) +
+  geom_boxplot(alpha = .5, color = 'blue') +
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               color = "red",
+               shape = 8,
+               size = 4)
+  
+p2 <- ggplot(aes(x = factor(quality), y = sulphates),
+        data = rw) +
+  geom_jitter(alpha = .3) +
+  geom_boxplot(alpha = .5, color = 'blue') +
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               color = "red",
+               shape = 8,
+               size = 4)
 
-p2 <- ggplot(aes(x = quality, y = sulphates, group = quality),
+p3 <- ggplot(aes(x = factor(quality), y = citric.acid),
         data = rw) +
-  geom_boxplot()+
-  scale_x_continuous(breaks = seq(3,8,1))
-
-p3 <- ggplot(aes(x = quality, y = citric.acid, group = quality),
-        data = rw) +
-  geom_boxplot() +
-  scale_x_continuous(breaks = seq(3,8,1))
+  geom_jitter(alpha = .3) +
+  geom_boxplot(alpha = .5, color = 'blue') +
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               color = "red",
+               shape = 8,
+               size = 4)
 
 grid.arrange(p1, p2, p3, ncol = 1)
 
@@ -421,21 +436,29 @@ sulphates.
 # Analyze whether citric.acid levels have different quality tendancies
 # across the range of sulphate levels.
 
-ggplot(aes(x = sulphates, y = factor(quality), color = citric.acid),
+
+ggplot(aes(x = citric.acid, 
+           y = sulphates  , color = factor(quality)), 
        data = rw) +
-      geom_point(position = 'jitter', alpha = 0.5, size = 4) +
-      coord_cartesian(xlim = c(0.2,1.0)) +
-      scale_colour_gradient(low = "black", high = "red") +
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1)  +
+      scale_y_log10(breaks = seq(0,2,.5)) +
+  scale_color_brewer(type='seq',
+                   guide=guide_legend(title='Quality')) +
       ggtitle('Sulphates and Citric Acid to Quality')
 
 ```
 
 In analyzing these charts, if citric acid had an impact on quality at different
-sulphate levels, one would expect to see a definitive graduation from black
-to red within a vertical cross section of differenct levels of sulphates.
-However, the distribution of red and black does not appear to show any pattern.
-Therefore, the addition of the citric acid variable within the analysis of 
-sulphates and quality does not appear to enhance any correlations.
+sulphate levels, interestingly, for wines recieving the highest quality rating
+(8), the relationship between sulphates indicates an inverse relationship
+(i.e. higher sulphates and lower citric levels do will in this quality group,
+and lower sulphates paired with higher citric acid levels tend), though the line
+is nearly flat.  However, for all other quality ratings the relationship is
+opposite that of wines in the highest quality category.  Based on this sample,
+one wishing to increase the chance of an 8 rating would want to keep citric
+acids lower and sulphates slightly higher, as this characteristic appears to
+have resulted in higher 8 ratings.
 
 
 The next chart will reverse the citric acid and sulphate values in the above
@@ -448,40 +471,26 @@ however, my inquisitive mind wants to see.
 # Analyze whether sulphate levels have different quality tendancies
 # across the range of citric.acid levels.
 
-ggplot(aes(x = citric.acid, y = quality, color = sulphates),
+ggplot(aes(x = sulphates, 
+           y = citric.acid  , color = factor(quality)), 
        data = rw) +
-      geom_point(position = 'jitter', alpha = 0.5, size = 4) +
-      coord_cartesian(xlim = c(0,1.0)) +
-      scale_colour_gradient(low = "black", high = "red") +
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1)  +
+      scale_x_log10(breaks = seq(0,2,.5)) +
+  scale_color_brewer(type='seq',
+                   guide=guide_legend(title='Quality')) +
       ggtitle('Citric Acid and Sulphates to Quality')
 
 ```
 
-Noticing that there are very few values of citric acid above, 0.75, I will 
-eliminate these aoutliers to enhance the main area of focus.
+Again, in analyzing these charts, it is clear that the impact of varying citric
+acid and sulphates in those wines that receive the highest ratings is opposite
+of the impact of these variables relationship in wines that recieved every other
+rating.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots2.1}
-
-# Analyze whether sulphate levels have different quality tendancies
-# across the range of citric.acid levels.
-
-ggplot(aes(x = citric.acid, y = quality, color = sulphates),
-       data = rw) +
-      geom_point(position = 'jitter', alpha = 0.5, size = 4) +
-      coord_cartesian(xlim = c(0,0.75)) +
-      scale_colour_gradient(low = "black", high = "red") +
-      ggtitle('Citric Acid and Sulphates to Quality')
-
-```
-
-Again, in analyzing these charts, if sulphates had an impact on quality at
-different citric acid levels, one would expect to see a definitive graduation 
-from black to red within a vertical cross section of differenct levels of citric
-acid.
-
-However, the distribution of red and black does not appear to show any pattern.
-Therefore, the addition of the sulphates variable within the analysis of 
-citric acid and quality does not appear to enhance any correlations.
+It does appear in both of these charts, that the highest concentration of wines
+receiving the highest rating had citric acit levels between 0.25 and 0.5 and 
+sulphate levels aroune 0.75.
 
 The next chart will look at how volatile acidity affects quality at different
 citric acid levels.  I will use the same limits above to focus the chart on 
@@ -492,21 +501,22 @@ values below 0.75.
 # Analyze whether volatile.acidity levels have different quality tendancies
 # across the range of citric.acid levels.
 
-ggplot(aes(x = citric.acid, y = quality, color = volatile.acidity),
+ggplot(aes(x = citric.acid, 
+           y = volatile.acidity  , color = factor(quality)), 
        data = rw) +
-      geom_point(position = 'jitter', alpha = 0.5, size = 4) +
-      coord_cartesian(xlim = c(0,0.75)) +
-      scale_colour_gradient(low = "black", high = "red") +
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1)  +
+      scale_y_log10(breaks = seq(0,2,.5)) +
+  scale_color_brewer(type='seq',
+                   guide=guide_legend(title='Quality')) +
       ggtitle('Citric Acid and Volatile Acidity to Quality')
 
 ```
 
-Reviewing this chart, I do not see that varying volatile acidity for a given
-citric acid level will have a significant impact on the quality.  I do, however,
-recognize the inverse correlation between these two values.  One will notice
-that for the lower levels of citric acid, there is more red in the chart
-(indicating higher volatile acidity) and toward the higher levels of citric acid
-there is less red and more black (indicating lower volatile acidity).
+Reviewing this chart, there is a clear inverse correlation between these two 
+variables.  One will notice that for the lower levels of citric acid, there many
+more instances of higher volatile acidity, and for the higher levels of citric 
+acid are more instances of lower volatile acidity.  However, there is no 
 
 The last view I will look at is the impact of citric acid on quality at varying
 levels of alcohol content, focusing on the most common alcohol levels between 9
@@ -516,25 +526,31 @@ and 14.
 # Analyze whether citric.acid levels have different quality tendancies
 # across the range of alcohol levels.
 
-ggplot(aes(x = alcohol, y = quality, color = citric.acid),
+ggplot(aes(x = citric.acid, 
+           y = alcohol  , color = factor(quality)), 
        data = rw) +
-      geom_point(position = 'jitter', alpha = 0.5, size = 4) +
-      coord_cartesian(xlim = c(9,14)) +
-      scale_colour_gradient(low = "black", high = "red") +
-      ggtitle('Citric Acid and Volatile Acidity to Quality')
+      coord_cartesian(ylim = c(9,14), xlim = c(0,0.8)) +
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1)  +
+  scale_color_brewer(type='seq',
+                   guide=guide_legend(title='Quality')) +
+      ggtitle('Citric Acid and Alcohol to Quality')
 ```
 
-Once again, this analysis fails to produce a notable impact of citric acid
-levels at any given level of alcohol.
+Here, in the lowest rated wines and the highest rated wines, the relationship
+between alcohol and citric acid is an inverse relationship, while in every other
+category of wine the relationship is nearly flat.
 
 # Multivariate Analysis
 
 Relating these three variables which appear to most impact quality, I did not
 notice any combinations that appeared to strengthen the correlation between
 the variables and quality.  Using color to indicate whether one variable tended
-to more stronly impact quality when combined with another variable, there was
+to more strongly impact quality when combined with another variable, there was
 no clear example where, for fixed values of the x variable, the color variable
-tended toward one end or the other of the quality scale.
+tended toward one end or the other of the quality scale.  While there were a
+couple of examples of "magic" happening in the highest quality of wines, there
+was no patterns that showed consistent impacts across the range of all wines.
 
 Maybe most intersting is that the negative correlation between citric acid and
 volatile acidity and their combined effect on quality was not evidenced by the 
@@ -556,8 +572,9 @@ the strongest relationships between quality and other variables.
 
 ggplot(aes(x = alcohol, y = quality),
        data = rw) +
-    geom_point(position = 'jitter', alpha = .25, size = 4) +
+    geom_point(position = 'jitter', alpha = .25, size = 2) +
     scale_x_continuous(limits = c(8,15), breaks = seq(0,15,1)) +
+    geom_smooth() +
     labs(title = 'A Comparison of Alcohol Content to Quality',
          x= 'Alcohol Content (% by volume)',
          y = 'Quality (Scale of 0 to 10)')
@@ -590,10 +607,11 @@ middle of the pack.
 
 ggplot(aes(x = volatile.acidity, y = quality),
        data = rw) +
-      geom_point(position = 'jitter', alpha = .25, size = 4) +
+      geom_point(position = 'jitter', alpha = .25, size = 2) +
       scale_x_continuous(breaks = seq(0,1.6,0.2)) +
+      geom_smooth() +
       labs(title = 'A Comparison of Volatile Acidity to Quality',
-         x= 'Volatile Acidity (acetic acid -g / dm^3',
+         x= 'Volatile Acidity (acetic acid -g / dm^3)',
          y = 'Quality (scale of 0 to 10)')
 ```
 
@@ -614,9 +632,10 @@ of 0.45.
 
 ggplot(aes(x = sulphates, y = quality),
        data = rw) +
-      geom_point(position = 'jitter', alpha = .25, size = 4) +
+      geom_point(position = 'jitter', alpha = .25, size = 2) +
       scale_x_continuous(breaks = seq(0,1.6,0.2)) +
       coord_cartesian(xlim = c(0.2,1.0)) +
+      geom_smooth() +
       labs(title = 'A Comparison of Sulphates to Quality',
          x= 'Sulphates (potassium sulphate - g / dm^3)',
          y = 'Quality (scale of 0 to 10)')
