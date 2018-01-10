@@ -1,3 +1,14 @@
+---
+title: "Red Wine Quality"
+author: Justin Brown
+date: January 10, 2018
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
 Red Wine Quality by Justin Brown
 ========================================================
 
